@@ -1,0 +1,24 @@
+{
+  "name": "crud-app",
+  "version": "1.0.0",
+  "description": "A CRUD app built with node js.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antnkrtk/crud-app.git"
+  },
+  "author": "Anton Karytka",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/antnkrtk/crud-app/issues"
+  },
+  "homepage": "https://github.com/antnkrtk/crud-app#readme",
+  "dependencies": {
+    "dnode": "^1.2.2",
+    "mongodb": "^2.2.25"
+  }
+}
