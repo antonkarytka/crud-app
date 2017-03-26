@@ -20,16 +20,28 @@ d.on('remote', (remote) => {
                     break;
 
                 case '2':
+                    rl.question('Which entity would you like to read? Example: players\n', (entity) => {
+                        remote.read(entity, () => {});
+                        startDialog();
+                    });
                     break;
 
                 case '3':
-                    rl.question('Which entity, object and field would you like to update? (example: players,Diego Costa,therapists,newValue)\n', (query) => {
+                    rl.question('Which entity, object and field would you like to update? Example: players,Diego Costa,therapists,newValue\n', (query) => {
                         remote.update(JSON.stringify(query), () => {});
                         startDialog();
                     });
                     break;
 
+                case '4':
+                    rl.question('Which entity/object/field would you like to delete? Example: players,Diego Costa (optional),field (optional)\n', (query) => {
+                        remote.delete(JSON.stringify(query), () => {});
+                        startDialog();
+                    });
+                    break;
+
                 case '0':
+                    console.log('Bye!');
                     process.exit();
 
                 default:
