@@ -13,15 +13,15 @@ d.on('remote', (remote) => {
         rl.question('\nWhat would you like to do with an entity?\n1) CREATE\n2) READ\n3) UPDATE\n4) DELETE\n\n0 - EXIT\n\n', (answer) => {
             switch (answer) {
                 case '1':
-                    rl.question('Which entity would you like to create?\n', (entity) => {
-                        remote.create(entity, () => {});
+                    rl.question('Which entity/object/field/value would you like to create? Example: players,Diego Costa (optional),field (optional), value (optional)\n', (query) => {
+                        remote.create(JSON.stringify(query), () => {});
                         startDialog();
                     });
                     break;
 
                 case '2':
-                    rl.question('Which entity would you like to read? Example: players\n', (entity) => {
-                        remote.read(entity, () => {});
+                    rl.question('Which entity/object would you like to read? Example: players,object (optional)\n', (query) => {
+                        remote.read(JSON.stringify(query), () => {});
                         startDialog();
                     });
                     break;
