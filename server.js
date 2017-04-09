@@ -1,138 +1,141 @@
 const dnode = require('dnode');
-const MongoClient = require('mongodb').MongoClient;
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 
-const url = 'mongodb://localhost:27017/footballClub';
+const db = new sqlite3.Database('football-club.db')
 
-MongoClient.connect(url, (err, db) => {
-    const server = dnode({
+const server = dnode({
+    createClub : (query, cb) => {
+        let queryItems = JSON.parse(query);
+        let club = queryItems[0];
+        db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`, (error) => {
+            if (error)
+                console.log(`Error occured inserting ${club} into CLUB table...`);
+            else
+                console.log(`${club} inserted into CLUBS table successfully!`);
+        });
+    },
 
-        create : (query, cb) => {
-            let queryItems = JSON.parse(query).split(',');
-            switch (queryItems.length) {
-                // OK
-                case 1 : {
-                    let entity = queryItems[0];
-                    cb(db.createCollection(entity));
-                    console.log(`${entity} entity CREATED successfully!`);
-                    break;
+    createPlayer : (query, cb) => {
+        let queryItems = JSON.parse(query);
+        let player = queryItems[0];
+        let club = queryItems[queryItems.length - 1];
+        db.serialize((error) => {
+            db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`);
+            db.run(`INSERT OR IGNORE INTO PLAYERS (player_name, club) VALUES ("${player}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
+            if (queryItems.length > 3) {
+                for (i = 1; i < queryItems.length - 1; i++) {
+                    db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${queryItems[i]}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
+                    db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${queryItems[i]}"))`);
                 }
-                // OK
-                case 2: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    cb(db.collection(entity).insertOne( { _id: object } ));
-                    console.log(`${object} object CREATED successfully in ${entity} collection!`);
-                    break;
-                }
-                // OK. An empty field won't show on READ function
-                // but will be modified on UPDATE function
-                case 3: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    let field = queryItems[2];
-                    cb(db.collection(entity).insertOne(
-                        { _id: object },
-                        { [field]: {$exists: false} },
-                        { [field]: '' }
-                    ));
-                    console.log(`${field} field CREATED successfully in ${object} object of ${entity} collection!`);
-                    break;
-                }
-                // OK
-                case 4: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    let field = queryItems[2];
-                    let value = queryItems[3];
-                    cb(db.collection(entity).updateOne(
-                        { _id: object },
-                        { $set: { [field]: value } },
-                        { upsert: true }
-                     ));
-                    console.log(`${value} value INSERTED to ${field} field successfully in ${object} object of ${entity} collection!`);
-                    break;
-                }
-
-                default:
-                    break;
+            } else {
+                let therapist = queryItems[1];
+                db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${therapist}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
+                db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
             };
-        },
 
-        read : (query, cb) => {
-            let queryItems = JSON.parse(query).split(',');
-            switch (queryItems.length) {
-                // OK
-                case 1: {
-                    let entity = queryItems[0];
-                    cb(db.collection(entity).find().forEach( (doc) => {
-                        console.log(doc);
-                    } ));
-                    break;
+            if (error)
+                console.log(`Error occured inserting ${player} into PLAYERS table...`);
+            else
+                console.log(`${player} inserted into PLAYERS table successfully`);
+        });
+    },
+
+    createTherapist : (query, cb) => {
+        let queryItems = JSON.parse(query);
+        let therapist = queryItems[0];
+        let club = queryItems[queryItems.length - 1];
+        db.serialize((error) => {
+            db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`);
+            db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${therapist}", "${club}")`);
+            if (queryItems.length > 3) {
+                for (i = 1; i < queryItems.length - 1; i++) {
+                    db.run(`INSERT OR IGNORE INTO PLAYERS (player_name, club) VALUES ("${queryItems[i]}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
+                    db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${queryItems[i]}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
                 }
-                // OK
-                case 2: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    cb(db.collection(entity).find( { _id: object } ).forEach( (doc) => {
-                        console.log(doc);
-                    } ));
-                    break;
-                }
-                default:
-                    break;
+            } else {
+                let player = queryItems[1];
+                db.run(`INSERT OR IGNORE INTO PLAYERS (players_name, club) VALUES ("${player}", "${club}")`);
+                db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
             }
-        },
-        // OK
-        update : (query, cb) => {
-            let queryItems = JSON.parse(query).split(',');
-            let entity = queryItems[0];
-            let object = queryItems[1];
-            let field = queryItems[2];
-            let value = queryItems[3];
-            cb(db.collection(entity).updateOne(
-                { _id: object },
-                { $set: { [field]: value } }
-            ));
-            console.log(`${value} value of ${field} field UPDATED successfully in ${object} object of ${entity} collection!`);
-        },
 
-        delete : (query, cb) => {
-            let queryItems = JSON.parse(query).split(',');
-            switch (queryItems.length) {
-                // OK
-                case 1 : {
-                    let entity = queryItems[0];
-                    cb(db.collection(entity).drop());
-                    console.log(`${entity} entity DELETED successfully!`);
-                    break;
-                }
-                // OK
-                case 2: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    cb(db.collection(entity).remove( { _id: object} ));
-                    console.log(`${object} object DELETED from ${entity} entity successfully!`);
-                    break;
-                }
-                // OK
-                case 3: {
-                    let entity = queryItems[0];
-                    let object = queryItems[1];
-                    let field = queryItems[2];
-                    cb(db.collection(entity).update( { _id: object }, { $unset: { [field]: "" } } ));
-                    console.log(`${field} field DELETED from ${object} object in ${entity} entity successfully!`);
-                    break;
-                }
+            if (error)
+                console.log(`Error occured inserting ${therapist} into THERAPISTS table...`);
+            else
+                console.log(`${therapist} inserted into THERAPISTS table successfully`);
+        });
+    },
 
-                default:
-                    break;
-            };
+    read : (query, cb) => {
+        let queryItems = JSON.parse(query).split(', ');
+        queryItems.map((string) => { return string.toUpperCase() });
+        switch (queryItems.length) {
+            case 1: {
+                let table = queryItems[0];
+                /*cb(db.collection(table).find().forEach( (doc) => {
+                    console.log(doc);
+                } ));*/
+                break;
+            }
+            case 2: {
+                let table = queryItems[0];
+                let column = queryItems[1];
+                /*cb(db.collection(table).find( { _id: column } ).forEach( (doc) => {
+                    console.log(doc);
+                } ));*/
+                break;
+            }
+            default:
+                break;
         }
-    });
+    },
 
-    server.listen(8080, () => { console.log('Server running on 8080...') });
+    update : (query, cb) => {
+        let queryItems = JSON.parse(query).split(', ');
+        queryItems.map((string) => { return string.toUpperCase() });
+        let table = queryItems[0];
+        let column = queryItems[1];
+        let value = queryItems[2];
+        /*cb(db.collection(table).updateOne(
+            { _id: column },
+            { $set: { [value]: value } }
+        ));*/
+        console.log(`${value} value of ${value} value UPDATED successfully in ${column} column of ${table} collection!`);
+    },
 
-    server.on('end', () => {
-        db.close();
-    })
+    delete : (query, cb) => {
+        let queryItems = JSON.parse(query).split(', ');
+        queryItems.map((string) => { return string.toUpperCase() });
+        switch (queryItems.length) {
+            case 1 : {
+                let table = queryItems[0];
+                //cb(db.collection(table).drop());
+                console.log(`${table} table DELETED successfully!`);
+                break;
+            }
+            case 2: {
+                let table = queryItems[0];
+                let column = queryItems[1];
+                //cb(db.collection(table).remove( { _id: column} ));
+                console.log(`${column} column DELETED from ${table} table successfully!`);
+                break;
+            }
+            case 3: {
+                let table = queryItems[0];
+                let column = queryItems[1];
+                let value = queryItems[2];
+                //cb(db.collection(table).update( { _id: column }, { $unset: { [value]: "" } } ));
+                console.log(`${value} value DELETED from ${column} column in ${table} table successfully!`);
+                break;
+            }
+            default:
+                break;
+        };
+    }
+});
+
+server.listen(8080, () => { console.log('Server running on 8080...') });
+
+server.on('end', () => {
+    db.close();
 });

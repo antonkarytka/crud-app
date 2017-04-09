@@ -19,6 +19,6 @@
   "homepage": "https://github.com/antnkrtk/crud-app#readme",
   "dependencies": {
     "dnode": "^1.2.2",
-    "mongodb": "^2.2.25"
+    "sqlite3": "^3.1.8"
   }
 }
