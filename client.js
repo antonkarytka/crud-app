@@ -14,27 +14,27 @@ d.on('remote', (remote) => {
             switch (answer) {
                 case '1':
                     let query = [];
-                    rl.question('Which table would you like to modify? (CLUB, PLAYERS, THERAPISTS)\n', (table) => {
-                        switch (table) {
-                            case 'CLUB': {
-                                rl.question('What is the name of the CLUB you\'d like to add? ', (clubName) => {
+                    rl.question('Who would you like to create? (club, player, doctor)\n', (entity) => {
+                        switch (entity) {
+                            case 'club': {
+                                rl.question('What is the name of the CLUB you\'d like to create? ', (clubName) => {
                                     query.push(clubName);
                                     remote.createClub(JSON.stringify(query));
                                     startDialog();
                                 });
                                 break;
                             }
-                            case 'PLAYERS': {
-                                rl.question('What is the name of the PLAYER you\'d like to add? ', (playerName) => {
+                            case 'player': {
+                                rl.question('What is the name of the PLAYER you\'d like to create? ', (playerName) => {
                                     query.push(playerName);
-                                    enterTherapist();
-                                    function enterTherapist() {
-                                        rl.question(`What is the name of the THERAPIST who works with ${playerName}? `, (therapistName) => {
-                                            query.push(therapistName);
-                                            rl.question(`Any other THERAPISTS who work with ${playerName}? (y/n) `, (choice) => {
+                                    enterDoctor();
+                                    function enterDoctor() {
+                                        rl.question(`What is the name of the DOCTOR who works with ${playerName}? `, (doctorName) => {
+                                            query.push(doctorName);
+                                            rl.question(`Any other DOCTORS who work with ${playerName}? (y/n) `, (choice) => {
                                                 switch (choice) {
                                                     case 'y':
-                                                        enterTherapist();
+                                                        enterDoctor();
                                                         break;
                                                     case 'n':
                                                         enterClub();
@@ -55,17 +55,17 @@ d.on('remote', (remote) => {
                                 });
                                 break;
                             }
-                            case 'THERAPISTS': {
-                                rl.question('What is the name of the THERAPIST you\'d like to add? ', (therapistName) => {
-                                    query.push(therapistName);
+                            case 'doctor': {
+                                rl.question('What is the name of the DOCTOR you\'d like to create? ', (doctorName) => {
+                                    query.push(doctorName);
                                     enterPlayer();
                                     function enterPlayer() {
-                                        rl.question(`What is the name of the PLAYER who works with ${therapistName}? `, (therapistName) => {
-                                            query.push(therapistName);
-                                            rl.question(`Any other PLAYERS who work with ${therapistName}? (y/n) `, (choice) => {
+                                        rl.question(`What is the name of the PLAYER who works with ${doctorName}? `, (playerName) => {
+                                            query.push(playerName);
+                                            rl.question(`Any other PLAYERS who work with ${doctorName}? (y/n) `, (choice) => {
                                                 switch (choice) {
                                                     case 'y':
-                                                        enterTherapist();
+                                                        enterPlayer();
                                                         break;
                                                     case 'n':
                                                         enterClub();
@@ -77,9 +77,9 @@ d.on('remote', (remote) => {
                                         });
                                     };
                                     function enterClub() {
-                                        rl.question(`What is the name of the CLUB ${therapistName} works for? `, (clubName) => {
+                                        rl.question(`What is the name of the CLUB ${doctorName} works for? `, (clubName) => {
                                             query.push(clubName);
-                                            remote.createTherapist(JSON.stringify(query));
+                                            remote.createdoctor(JSON.stringify(query));
                                             startDialog();
                                         });
                                     }
@@ -103,7 +103,7 @@ d.on('remote', (remote) => {
                     break;
 
                 case '3':
-                    rl.question('Which entity, object and field would you like to update? Example: players,Diego Costa,therapists,newValue\n', (query) => {
+                    rl.question('Which entity, object and field would you like to update? Example: players,Diego Costa,doctors,newValue\n', (query) => {
                         remote.update(JSON.stringify(query), () => {});
                         startDialog();
                     });

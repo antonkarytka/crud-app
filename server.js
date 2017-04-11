@@ -1,68 +1,112 @@
 const dnode = require('dnode');
-const sqlite3 = require('sqlite3').verbose();
+const Sequelize = require('sequelize');
 const path = require('path');
 
-const db = new sqlite3.Database('football-club.db')
+const sequelize = new Sequelize('footballClub.sqlite', null, null, {
+    host: 'localhost',
+    port: 3000,
+    dialect: 'sqlite',
+    storage: './footballClub.sqlite'
+});
+
+const Club = sequelize.define('club', {
+    clubId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    clubName: {
+        type: Sequelize.TEXT,
+        unique: true
+    }
+});
+
+const Player = sequelize.define('player', {
+    playerId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    playerName: {
+        type: Sequelize.TEXT,
+        unique: true
+    }
+});
+
+const Doctor = sequelize.define('doctor', {
+    doctorId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    doctorName: {
+        type: Sequelize.TEXT,
+        unique: true
+    }
+});
+
+Player.belongsTo(Club);
+Doctor.belongsTo(Club);
+Player.belongsToMany(Doctor, {through: 'PlayersDoctors'});
+Doctor.belongsToMany(Player, {through: 'PlayersDoctors'});
+
+sequelize.sync();
 
 const server = dnode({
     createClub : (query, cb) => {
         let queryItems = JSON.parse(query);
         let club = queryItems[0];
-        db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`, (error) => {
-            if (error)
-                console.log(`Error occured inserting ${club} into CLUB table...`);
-            else
-                console.log(`${club} inserted into CLUBS table successfully!`);
-        });
+        Club.findOrCreate({ where: { clubName: club } });
     },
 
     createPlayer : (query, cb) => {
         let queryItems = JSON.parse(query);
         let player = queryItems[0];
         let club = queryItems[queryItems.length - 1];
-        db.serialize((error) => {
-            db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`);
-            db.run(`INSERT OR IGNORE INTO PLAYERS (player_name, club) VALUES ("${player}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
-            if (queryItems.length > 3) {
-                for (i = 1; i < queryItems.length - 1; i++) {
-                    db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${queryItems[i]}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
-                    db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${queryItems[i]}"))`);
-                }
-            } else {
-                let therapist = queryItems[1];
-                db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${therapist}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
-                db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
-            };
-
-            if (error)
-                console.log(`Error occured inserting ${player} into PLAYERS table...`);
-            else
-                console.log(`${player} inserted into PLAYERS table successfully`);
+        Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
+            Player.findOrCreate({ where: { playerName: player } }).spread((player) => {
+                player.setClub(club);
+                if (queryItems.length > 3) {
+                    for (i = 1; i < queryItems.length - 1; i++) {
+                        Doctor.findOrCreate({ where: { doctorName: queryItems[i] } }).spread((doctor) => {
+                            doctor.setClub(club);
+                            player.addDoctors(doctor);
+                        });
+                    }
+                } else {
+                    let doctor = queryItems[1];
+                    Doctor.findOrCreate({ where: { doctorName: doctor } }).spread((doctor) => {
+                        player.addDoctors(doctor);
+                    });
+                };
+            });
         });
     },
 
-    createTherapist : (query, cb) => {
+    createdoctor : (query, cb) => {
         let queryItems = JSON.parse(query);
-        let therapist = queryItems[0];
+        let doctor = queryItems[0];
         let club = queryItems[queryItems.length - 1];
-        db.serialize((error) => {
-            db.run(`INSERT OR IGNORE INTO CLUBS (club_name) VALUES ("${club}")`);
-            db.run(`INSERT OR IGNORE INTO THERAPISTS (therapist_name, club) VALUES ("${therapist}", "${club}")`);
-            if (queryItems.length > 3) {
-                for (i = 1; i < queryItems.length - 1; i++) {
-                    db.run(`INSERT OR IGNORE INTO PLAYERS (player_name, club) VALUES ("${queryItems[i]}", (SELECT club_id FROM CLUBS WHERE club_name = "${club}"))`);
-                    db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${queryItems[i]}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
+        Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
+            Doctor.findOrCreate({ where: { doctorName: doctor } }).spread((doctor) => {
+                doctor.setClub(club);
+                if (queryItems.length > 3) {
+                    for (i = 1; i < queryItems.length - 1; i++) {
+                        Player.findOrCreate({ where: { playerName: queryItems[i] } }).spread((player) => {
+                            player.setClub(club);
+                            doctor.addPlayers(player);
+                        });
+                    }
+                } else {
+                    let player = queryItems[1];
+                    Player.findOrCreate({ where: { playerName: player } }).spread((player) => {
+                        doctor.addPlayers(player);
+                    });
                 }
-            } else {
-                let player = queryItems[1];
-                db.run(`INSERT OR IGNORE INTO PLAYERS (players_name, club) VALUES ("${player}", "${club}")`);
-                db.run(`INSERT OR IGNORE INTO PLAYERS_THERAPISTS (player, therapist) VALUES ((SELECT player_id FROM PLAYERS WHERE player_name = "${player}"), (SELECT therapist_id FROM THERAPISTS WHERE therapist_name = "${therapist}"))`);
-            }
-
-            if (error)
-                console.log(`Error occured inserting ${therapist} into THERAPISTS table...`);
-            else
-                console.log(`${therapist} inserted into THERAPISTS table successfully`);
+            });
         });
     },
 
@@ -100,7 +144,7 @@ const server = dnode({
             { _id: column },
             { $set: { [value]: value } }
         ));*/
-        console.log(`${value} value of ${value} value UPDATED successfully in ${column} column of ${table} collection!`);
+        console.log(`${value} value of ${value} value UPDATED spreadfully in ${column} column of ${table} collection!`);
     },
 
     delete : (query, cb) => {
@@ -110,14 +154,14 @@ const server = dnode({
             case 1 : {
                 let table = queryItems[0];
                 //cb(db.collection(table).drop());
-                console.log(`${table} table DELETED successfully!`);
+                console.log(`${table} table DELETED spreadfully!`);
                 break;
             }
             case 2: {
                 let table = queryItems[0];
                 let column = queryItems[1];
                 //cb(db.collection(table).remove( { _id: column} ));
-                console.log(`${column} column DELETED from ${table} table successfully!`);
+                console.log(`${column} column DELETED from ${table} table spreadfully!`);
                 break;
             }
             case 3: {
@@ -125,7 +169,7 @@ const server = dnode({
                 let column = queryItems[1];
                 let value = queryItems[2];
                 //cb(db.collection(table).update( { _id: column }, { $unset: { [value]: "" } } ));
-                console.log(`${value} value DELETED from ${column} column in ${table} table successfully!`);
+                console.log(`${value} value DELETED from ${column} column in ${table} table spreadfully!`);
                 break;
             }
             default:
