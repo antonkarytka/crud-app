@@ -79,7 +79,7 @@ d.on('remote', (remote) => {
                                     function enterClub() {
                                         rl.question(`What is the name of the CLUB ${doctorName} works for? `, (clubName) => {
                                             query.push(clubName);
-                                            remote.createdoctor(JSON.stringify(query));
+                                            remote.createDoctor(JSON.stringify(query));
                                             startDialog();
                                         });
                                     }
@@ -110,11 +110,38 @@ d.on('remote', (remote) => {
                     break;
 
                 case '4':
-                    rl.question('Which entity/object/field would you like to delete? Example: players,Diego Costa (optional),field (optional)\n', (query) => {
-                        remote.delete(JSON.stringify(query), () => {});
-                        startDialog();
+                    rl.question('Who would you like to delete? (club, player, doctor)\n', (entity) => {
+                        switch (entity) {
+                            case 'club': {
+                                rl.question('What is the name of the CLUB you\'d like to delete? ', (clubName) => {
+                                    remote.deleteClub(JSON.stringify(clubName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'player': {
+                                rl.question('What is the name of the PLAYER you\'d like to delete? ', (playerName) => {
+                                    remote.deletePlayer(JSON.stringify(playerName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'doctor': {
+                                rl.question('What is the name of the DOCTOR you\'d like to delete? ', (doctorName) => {
+                                    remote.deleteDoctor(JSON.stringify(doctorName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            default: {
+                                console.log('Choose one of the above options, please.');
+                                startDialog();
+                                break;
+                            }
+                        }
                     });
                     break;
+
 
                 case '0':
                     console.log('Bye!');

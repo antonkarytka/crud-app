@@ -86,12 +86,12 @@ const server = dnode({
         });
     },
 
-    createdoctor : (query, cb) => {
+    createDoctor : (query, cb) => {
         let queryItems = JSON.parse(query);
         let doctor = queryItems[0];
         let club = queryItems[queryItems.length - 1];
         Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
-            Doctor.findOrCreate({ where: { doctorName: doctor } }).spread((doctor) => {
+            Doctor.findOrCreate({ where: { doctorName: player } }).spread((doctor) => {
                 doctor.setClub(club);
                 if (queryItems.length > 3) {
                     for (i = 1; i < queryItems.length - 1; i++) {
@@ -147,34 +147,19 @@ const server = dnode({
         console.log(`${value} value of ${value} value UPDATED spreadfully in ${column} column of ${table} collection!`);
     },
 
-    delete : (query, cb) => {
-        let queryItems = JSON.parse(query).split(', ');
-        queryItems.map((string) => { return string.toUpperCase() });
-        switch (queryItems.length) {
-            case 1 : {
-                let table = queryItems[0];
-                //cb(db.collection(table).drop());
-                console.log(`${table} table DELETED spreadfully!`);
-                break;
-            }
-            case 2: {
-                let table = queryItems[0];
-                let column = queryItems[1];
-                //cb(db.collection(table).remove( { _id: column} ));
-                console.log(`${column} column DELETED from ${table} table spreadfully!`);
-                break;
-            }
-            case 3: {
-                let table = queryItems[0];
-                let column = queryItems[1];
-                let value = queryItems[2];
-                //cb(db.collection(table).update( { _id: column }, { $unset: { [value]: "" } } ));
-                console.log(`${value} value DELETED from ${column} column in ${table} table spreadfully!`);
-                break;
-            }
-            default:
-                break;
-        };
+    deleteClub : (query, cb) => {
+        let club = JSON.parse(query);
+        Club.destroy({ where: { clubName: club } });
+    },
+
+    deletePlayer : (query, cb) => {
+        let player = JSON.parse(query);
+        Player.destroy({ where: { playerName: player } });
+    },
+
+    deleteDoctor : (query, cb) => {
+        let doctor = JSON.parse(query);
+        Doctor.destroy({ where: { doctorName: doctor } });
     }
 });
 
