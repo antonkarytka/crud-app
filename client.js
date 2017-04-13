@@ -96,16 +96,74 @@ d.on('remote', (remote) => {
                     break;
 
                 case '2':
-                    rl.question('Which entity/object would you like to read? Example: players,object (optional)\n', (query) => {
-                        remote.read(JSON.stringify(query), () => {});
-                        startDialog();
+                    rl.question('Who would you like to read? (club, player, doctor)\n', (entity) => {
+                        switch (entity) {
+                            case 'club': {
+                                rl.question('What is the name of the CLUB you\'d like to read? ', (clubName) => {
+                                    remote.readClub(JSON.stringify(clubName), (result) => {
+                                        console.log(result);
+                                    });
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'player': {
+                                rl.question('What is the name of the PLAYER you\'d like to read? ', (playerName) => {
+                                    remote.readPlayer(JSON.stringify(playerName), (result) => {
+                                        console.log(result);
+                                    });
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'doctor': {
+                                rl.question('What is the name of the DOCTOR you\'d like to read? ', (doctorName) => {
+                                    remote.readDoctor(JSON.stringify(doctorName), (result) => {
+                                        console.log(result);
+                                    });
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            default: {
+                                console.log('Choose one of the above options, please.');
+                                startDialog();
+                                break;
+                            }
+                        }
                     });
                     break;
 
                 case '3':
-                    rl.question('Which entity, object and field would you like to update? Example: players,Diego Costa,doctors,newValue\n', (query) => {
-                        remote.update(JSON.stringify(query), () => {});
-                        startDialog();
+                    rl.question('Who would you like to read? (club, player, doctor)\n', (entity) => {
+                        switch (entity) {
+                            case 'club': {
+                                rl.question('What is the name of the CLUB you\'d like to read? ', (clubName) => {
+                                    remote.readClub(JSON.stringify(clubName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'player': {
+                                rl.question('What is the name of the PLAYER you\'d like to read? ', (playerName) => {
+                                    remote.readPlayer(JSON.stringify(playerName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            case 'doctor': {
+                                rl.question('What is the name of the DOCTOR you\'d like to read? ', (doctorName) => {
+                                    remote.readDoctor(JSON.stringify(doctorName));
+                                    startDialog();
+                                });
+                                break;
+                            }
+                            default: {
+                                console.log('Choose one of the above options, please.');
+                                startDialog();
+                                break;
+                            }
+                        }
                     });
                     break;
 

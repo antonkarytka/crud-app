@@ -49,7 +49,9 @@ const Doctor = sequelize.define('doctor', {
 });
 
 Player.belongsTo(Club);
+Club.hasMany(Player);
 Doctor.belongsTo(Club);
+Club.hasMany(Doctor);
 Player.belongsToMany(Doctor, {through: 'PlayersDoctors'});
 Doctor.belongsToMany(Player, {through: 'PlayersDoctors'});
 
@@ -69,10 +71,12 @@ const server = dnode({
         Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
             Player.findOrCreate({ where: { playerName: player } }).spread((player) => {
                 player.setClub(club);
+                club.setPlayers(player);
                 if (queryItems.length > 3) {
                     for (i = 1; i < queryItems.length - 1; i++) {
                         Doctor.findOrCreate({ where: { doctorName: queryItems[i] } }).spread((doctor) => {
                             doctor.setClub(club);
+                            club.setDoctors(doctor);
                             player.addDoctors(doctor);
                         });
                     }
@@ -91,12 +95,14 @@ const server = dnode({
         let doctor = queryItems[0];
         let club = queryItems[queryItems.length - 1];
         Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
-            Doctor.findOrCreate({ where: { doctorName: player } }).spread((doctor) => {
+            Doctor.findOrCreate({ where: { doctorName: doctor } }).spread((doctor) => {
                 doctor.setClub(club);
+                club.setDoctors(doctor);
                 if (queryItems.length > 3) {
                     for (i = 1; i < queryItems.length - 1; i++) {
                         Player.findOrCreate({ where: { playerName: queryItems[i] } }).spread((player) => {
                             player.setClub(club);
+                            club.setPlayers(player);
                             doctor.addPlayers(player);
                         });
                     }
@@ -110,28 +116,76 @@ const server = dnode({
         });
     },
 
-    read : (query, cb) => {
-        let queryItems = JSON.parse(query).split(', ');
-        queryItems.map((string) => { return string.toUpperCase() });
-        switch (queryItems.length) {
-            case 1: {
-                let table = queryItems[0];
-                /*cb(db.collection(table).find().forEach( (doc) => {
-                    console.log(doc);
-                } ));*/
-                break;
-            }
-            case 2: {
-                let table = queryItems[0];
-                let column = queryItems[1];
-                /*cb(db.collection(table).find( { _id: column } ).forEach( (doc) => {
-                    console.log(doc);
-                } ));*/
-                break;
-            }
-            default:
-                break;
-        }
+    readClub : (query, cb) => {
+        let club = JSON.parse(query);
+        Club.find({ where: { clubName: club } }).then((club) => {
+            let clubInfo = '';
+            club.getPlayers().then((players) => {
+                clubInfo += 'Players: ';
+                if (players.length > 0) {
+                    for (let player of players)
+                        clubInfo += `${player.playerName}, `;
+                    clubInfo = clubInfo.slice(0, -2);
+                    clubInfo += '\n';
+                } else {
+                    clubInfo += 'none';
+                }
+            });
+            club.getDoctors().then((doctors) => {
+                clubInfo += 'Doctors: ';
+                if (doctors.length > 0) {
+                    for (let doctor of doctors)
+                        clubInfo += `${doctor.doctorName}, `;
+                    clubInfo = clubInfo.slice(0, -2);
+                    clubInfo += '\n';
+                } else {
+                    clubInfo += 'none';
+                }
+                cb(clubInfo);
+            });
+        });
+    },
+
+    readPlayer : (query, cb) => {
+        let player = JSON.parse(query);
+        Player.find({ where: { playerName: player } }).then((player) => {
+            let playerInfo = '';
+            player.getClub().then((club) => {
+                playerInfo += `Club: ${club.clubName}\n`;
+            });
+            player.getDoctors().then((doctors) => {
+                playerInfo += 'Doctors: ';
+                if (doctors.length > 0) {
+                    for (let doctor of doctors)
+                        playerInfo += `${doctor.doctorName}, `;
+                    playerInfo = playerInfo.slice(0, -2);
+                } else {
+                    playerInfo += 'none';
+                }
+                cb(playerInfo);
+            });
+        });
+    },
+
+    readDoctor : (query, cb) => {
+        let doctor = JSON.parse(query);
+        Doctor.find({ where: { doctorName: doctor } }).then((doctor) => {
+            let doctorInfo = '';
+            doctor.getClub().then((club) => {
+                doctorInfo += `Club: ${club.clubName}\n`;
+            });
+            doctor.getPlayers().then((players) => {
+                doctorInfo += 'Players: ';
+                if (players.length > 0) {
+                    for (let player of players)
+                        doctorInfo += `${player.playerName}, `;
+                    doctorInfo = doctorInfo.slice(0, -2);
+                } else {
+                    doctorInfo += 'none';
+                }
+                cb(doctorInfo);
+            });
+        });
     },
 
     update : (query, cb) => {
