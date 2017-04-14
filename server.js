@@ -111,7 +111,7 @@ const server = dnode({
                     Player.findOrCreate({ where: { playerName: player } }).spread((player) => {
                         doctor.addPlayers(player);
                     });
-                }
+                };
             });
         });
     },
@@ -129,7 +129,7 @@ const server = dnode({
                     clubInfo += '\n';
                 } else {
                     clubInfo += 'none';
-                }
+                };
             });
             club.getDoctors().then((doctors) => {
                 clubInfo += 'Doctors: ';
@@ -140,7 +140,7 @@ const server = dnode({
                     clubInfo += '\n';
                 } else {
                     clubInfo += 'none';
-                }
+                };
                 cb(clubInfo);
             });
         });
@@ -161,7 +161,7 @@ const server = dnode({
                     playerInfo = playerInfo.slice(0, -2);
                 } else {
                     playerInfo += 'none';
-                }
+                };
                 cb(playerInfo);
             });
         });
@@ -182,23 +182,22 @@ const server = dnode({
                     doctorInfo = doctorInfo.slice(0, -2);
                 } else {
                     doctorInfo += 'none';
-                }
+                };
                 cb(doctorInfo);
             });
         });
     },
 
-    update : (query, cb) => {
-        let queryItems = JSON.parse(query).split(', ');
-        queryItems.map((string) => { return string.toUpperCase() });
-        let table = queryItems[0];
-        let column = queryItems[1];
-        let value = queryItems[2];
-        /*cb(db.collection(table).updateOne(
-            { _id: column },
-            { $set: { [value]: value } }
-        ));*/
-        console.log(`${value} value of ${value} value UPDATED spreadfully in ${column} column of ${table} collection!`);
+    updateClub : (query, cb) => {
+
+    },
+
+    updatePlayer : (query, cb) => {
+
+    },
+
+    updateDoctor : (query, cb) => {
+
     },
 
     deleteClub : (query, cb) => {
@@ -214,6 +213,78 @@ const server = dnode({
     deleteDoctor : (query, cb) => {
         let doctor = JSON.parse(query);
         Doctor.destroy({ where: { doctorName: doctor } });
+    },
+
+    showClubs : (cb) => {
+        let clubsList = 'Existing clubs: ';
+        Club.findAll().then((clubs) => {
+            if (clubs.length > 0) {
+                for (let club of clubs)
+                    clubsList += `${club.clubName}, `;
+                clubsList = clubsList.slice(0, -2);
+            } else {
+                clubsList += 'none';
+            };
+            cb(clubsList);
+        });
+    },
+
+    showPlayers : (cb) => {
+        let playersList = 'Existing players: ';
+        Player.findAll().then((players) => {
+            if (players.length > 0) {
+                for (let player of players)
+                    playersList += `${player.playerName}, `;
+                playersList = playersList.slice(0, -2);
+            } else {
+                playersList += 'none';
+            };
+            cb(playersList);
+        });
+    },
+
+    showDoctors : (cb) => {
+        let doctorsList = 'Existing doctors: ';
+        Doctor.findAll().then((doctors) => {
+            if (doctors.length > 0) {
+                for (let doctor of doctors)
+                    doctorsList += `${doctor.doctorName}, `;
+                doctorsList = doctorsList.slice(0, -2);
+            } else {
+                doctorsList += 'none';
+            };
+            cb(doctorsList);
+        });
+    },
+
+    checkClubExistence : (query, cb) => {
+        let club = JSON.parse(query);
+        Club.find({ where: { clubName: club } }).then((club) => {
+            if (club)
+                cb('exists');
+            else
+                cb(`${club} does not exist. Please, create it first.`);
+        });
+    },
+
+    checkPlayerExistence : (query, cb) => {
+        let player = JSON.parse(query);
+        Club.find({ where: { playerName: player } }).then((player) => {
+            if (player)
+                cb('exists');
+            else
+                cb(`${player} does not exist. Please, create him first.`);
+        });
+    },
+
+    checkDoctorExistence : (query, cb) => {
+        let doctor = JSON.parse(query);
+        Club.find({ where: { doctorName: doctor } }).then((doctor) => {
+            if (doctor)
+                cb('exists');
+            else
+                cb(`${doctor} does not exist. Please, create him first.`);
+        });
     }
 });
 
