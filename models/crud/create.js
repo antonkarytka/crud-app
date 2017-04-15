@@ -17,12 +17,12 @@ module.exports = {
         Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
             Player.findOrCreate({ where: { playerName: player } }).spread((player) => {
                 player.setClub(club);
-                club.setPlayers(player);
+                club.addPlayers(player);
                 if (queryItems.length > 3) {
                     for (i = 1; i < queryItems.length - 1; i++) {
                         Doctor.findOrCreate({ where: { doctorName: queryItems[i] } }).spread((doctor) => {
                             doctor.setClub(club);
-                            club.setDoctors(doctor);
+                            club.addDoctors(doctor);
                             player.addDoctors(doctor);
                         });
                     }
@@ -43,12 +43,12 @@ module.exports = {
         Club.findOrCreate({ where: { clubName: club } }).spread((club) => {
             Doctor.findOrCreate({ where: { doctorName: doctor } }).spread((doctor) => {
                 doctor.setClub(club);
-                club.setDoctors(doctor);
+                club.addDoctors(doctor);
                 if (queryItems.length > 3) {
                     for (i = 1; i < queryItems.length - 1; i++) {
                         Player.findOrCreate({ where: { playerName: queryItems[i] } }).spread((player) => {
                             player.setClub(club);
-                            club.setPlayers(player);
+                            club.addPlayers(player);
                             doctor.addPlayers(player);
                         });
                     }
