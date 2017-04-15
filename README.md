@@ -1,2 +1,2 @@
 # crud-app
-CRUD app developed using Node.js and SQLite. 
+CRUD app developed using Node.js and Sequelize ORM. 
