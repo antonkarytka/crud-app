@@ -339,6 +339,7 @@ d.on('remote', (remote) => {
                             }
                             case 'player': {
                                 remote.showPlayers((players) => {
+                                    console.log(players);
                                     rl.question('What is the name of the PLAYER you\'d like to delete? ', (playerName) => {
                                         remote.deletePlayer(JSON.stringify(playerName));
                                         startDialog();
@@ -348,6 +349,7 @@ d.on('remote', (remote) => {
                             }
                             case 'doctor': {
                                 remote.showDoctors((doctors) => {
+                                    console.log(doctors);
                                     rl.question('What is the name of the DOCTOR you\'d like to delete? ', (doctorName) => {
                                         remote.deleteDoctor(JSON.stringify(doctorName));
                                         startDialog();
