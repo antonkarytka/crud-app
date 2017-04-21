@@ -6,31 +6,69 @@ const Doctor = orm.Doctor;
 module.exports = {
     club : (query, cb) => {
         let queryItemts = JSON.parse(query);
-        let oldClubName = queryItemts[0];
-        let newClubName = queryItemts[1];
-        Club.update(
-        	{ clubName: newClubName },
-        	{ where: { clubName: oldClubName } }
-        );
+        let instanceChoice = queryItemts[0];
+        let instanceName = queryItemts[1];
+        let newClubName = queryItemts[2];
+        if (instanceChoice == 'player') {
+            Player.find({ where: { playerName: instanceName }}).then(player => {
+                Club.findOrCreate({ where: { clubName: newClubName }}).spread(club => {
+                    player.setClub(club);
+                });
+            });
+        } else {
+            Doctor.find({ where: { doctorName: instanceName }}).then(doctor => {
+                Club.findOrCreate({ where: { clubName: newClubName }}).spread(club => {
+                    doctor.setClub(club);
+                });
+            });
+        };
     },
 
     player : (query, cb) => {
         let queryItemts = JSON.parse(query);
-        let oldPlayerName = queryItemts[0];
-        let newPlayerName = queryItemts[1];
-        Player.update(
-        	{ playerName: newPlayerName },
-        	{ where: { playerName: oldPlayerName } }
-        );
+        let doctorName = queryItemts[0];
+        let actionChoice = queryItemts[1];
+        let playerName = queryItemts[2];
+        if (actionChoice == 'add') {
+            Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
+                Player.find({ where: { playerName: playerName }}).then(player => {
+                    doctor.addPlayer(player);
+                });
+            });
+        } else {
+            Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
+                Player.find({ where: { playerName: playerName }}).then(player => {
+                    doctor.getPlayers().then(players => {
+                        let deletionIndex = players.indexOf(playerName);
+                        players.splice(deletionIndex, 1);
+                        doctor.setPlayers(players);
+                    });
+                });
+            });
+        };
     },
 
     doctor : (query, cb) => {
         let queryItemts = JSON.parse(query);
-        let oldDoctorName = queryItemts[0];
-        let newDoctorName = queryItemts[1];
-        Doctor.update(
-        	{ doctorName: newDoctorName },
-        	{ where: { doctorName: oldDoctorName } }
-        );
+        let playerName = queryItemts[0];
+        let actionChoice = queryItemts[1];
+        let doctorName = queryItemts[2];
+        if (actionChoice == 'add') {
+            Player.find({ where: { playerName: playerName }}).then(player => {
+                Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
+                    player.addDoctor(doctor);
+                });
+            });
+        } else {
+            Player.find({ where: { playerName: playerName }}).then(player => {
+                Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
+                    player.getDoctors().then(doctors => {
+                        let deletionIndex = doctors.indexOf(doctorName);
+                        doctors.splice(deletionIndex, 1);
+                        player.setDoctors(doctors);
+                    });
+                });
+            });
+        };
     }
 }

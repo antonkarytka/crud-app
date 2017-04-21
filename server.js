@@ -5,7 +5,6 @@ const read = require('./models/crud/read');
 const update = require('./models/crud/update');
 const del = require('./models/crud/delete');
 const show = require('./models/secondary/show');
-const checkExistence = require('./models/secondary/check-existence');
 
 const server = dnode({
     createClub : create.club,
@@ -22,10 +21,7 @@ const server = dnode({
     deleteDoctor : del.doctor,
     showClubs : show.clubs,
     showPlayers : show.players,
-    showDoctors : show.doctors,
-    checkClubExistence : checkExistence.club,
-    checkPlayerExistence : checkExistence.player,
-    checkDoctorExistence : checkExistence.doctor
+    showDoctors : show.doctors
 });
 
 server.listen(8080, () => { console.log('Server running on 8080...') });

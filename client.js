@@ -15,9 +15,9 @@ d.on('remote', (remote) => {
             switch (answer) {
                 // CREATE
                 case '1':
-                    rl.question('Who would you like to create? (club, player, doctor)\n', (entity) => {
+                    rl.question('Who would you like to create - club(1), player(2) or  doctor(3)?\n', (entity) => {
                         switch (entity) {
-                            case 'club': {
+                            case '1': {
                                 remote.showClubs((clubs) => {
                                     console.log(clubs);
                                     rl.question('What is the name of the CLUB you\'d like to create? ', (clubName) => {
@@ -33,7 +33,7 @@ d.on('remote', (remote) => {
                                 });
                                 break;
                             }
-                            case 'player': {
+                            case '2': {
                                 remote.showPlayers((players) => {
                                     console.log(players);
                                     rl.question('What is the name of the PLAYER you\'d like to create? ', (playerName) => {
@@ -49,7 +49,7 @@ d.on('remote', (remote) => {
                                                         break;
                                                     default:
                                                         enterClub();
-                                                };    
+                                                };
                                             });
                                         } else {
                                             console.log('Player\'s name must contain letters. Please, try again.');
@@ -73,7 +73,7 @@ d.on('remote', (remote) => {
                                                     });
                                                 } else {
                                                     console.log('Doctor\'s name must contain letters. Please, try again.');
-                                                    enterDoctor(); 
+                                                    enterDoctor();
                                                 }
                                             });
                                         };
@@ -85,7 +85,7 @@ d.on('remote', (remote) => {
                                                     startDialog();
                                                 } else {
                                                     console.log('Club\'s name must contain letters. Please, try again.');
-                                                    enterClub();               
+                                                    enterClub();
                                                 }
                                             });
                                         }
@@ -93,7 +93,7 @@ d.on('remote', (remote) => {
                                 });
                                 break;
                             }
-                            case 'doctor': {
+                            case '3': {
                                 remote.showDoctors((doctors) => {
                                     console.log(doctors);
                                     rl.question('What is the name of the DOCTOR you\'d like to create? ', (doctorName) => {
@@ -109,11 +109,11 @@ d.on('remote', (remote) => {
                                                         break;
                                                     default:
                                                         enterClub();
-                                                };    
+                                                };
                                             });
                                         } else {
                                             console.log('Doctor\'s name must contain letters. Please, try again.');
-                                            startDialog();                                                        
+                                            startDialog();
                                         }
                                         function enterPlayer() {
                                             rl.question(`What is the name of the PLAYER who works with ${doctorName}? `, (playerName) => {
@@ -133,7 +133,7 @@ d.on('remote', (remote) => {
                                                     });
                                                 } else {
                                                     console.log('Player\'s name must contain letters. Please, try again.');
-                                                    enterPlayer();                                                    
+                                                    enterPlayer();
                                                 }
                                             });
                                         };
@@ -145,7 +145,7 @@ d.on('remote', (remote) => {
                                                     startDialog();
                                                 } else {
                                                     console.log('Club\'s name must contain letters. Please, try again.');
-                                                    enterClub();                                                      
+                                                    enterClub();
                                                 }
                                             });
                                         };
@@ -164,60 +164,51 @@ d.on('remote', (remote) => {
 
                 // READ
                 case '2':
-                    rl.question('Who would you like to read? (club, player, doctor)\n', (entity) => {
+                    rl.question('Who would you like to read - club(1), player(2) or doctor(3)?\n', (entity) => {
                         switch (entity) {
-                            case 'club': {
+                            case '1': {
                                 remote.showClubs((clubs) => {
                                     console.log(clubs);
                                     rl.question('What is the name of the CLUB you\'d like to read? ', (clubName) => {
-                                        remote.checkClubExistence(JSON.stringify(clubName), (result) => {
-                                            if (result == 'exists') {
-                                                remote.readClub(JSON.stringify(clubName), (result) => {
-                                                    console.log(result);
-                                                    startDialog();
-                                                });
+                                        remote.readClub(JSON.stringify(clubName), (clubInfo) => {
+                                            if (clubInfo != 'error') {
+                                                console.log(clubInfo);
                                             } else {
-                                                console.log(`${clubName} does not exist. You should create it first.`);
-                                                startDialog();
+                                                console.log(`${clubName} does not exist. Please, create it first.`);
                                             };
+                                            startDialog();
                                         });
                                     });
                                 });
                                 break;
                             }
-                            case 'player': {
+                            case '2': {
                                 remote.showPlayers((players) => {
                                     console.log(players);
                                     rl.question('What is the name of the PLAYER you\'d like to read? ', (playerName) => {
-                                        remote.checkPlayerExistence(JSON.stringify(playerName), (result) => {
-                                            if (result == 'exists') {
-                                                remote.readPlayer(JSON.stringify(playerName), (result) => {
-                                                    console.log(result);
-                                                    startDialog();
-                                                });
+                                        remote.readPlayer(JSON.stringify(playerName), (playerInfo) => {
+                                            if (playerInfo != 'error') {
+                                                console.log(playerInfo);
                                             } else {
-                                                console.log(`${playerName} does not exist. You should create him first.`);
-                                                startDialog();
+                                                console.log(`${playerName} does not exist. Please, create him first.`);
                                             };
+                                            startDialog();
                                         });
                                     });
                                 });
                                 break;
                             }
-                            case 'doctor': {
+                            case '3': {
                                 remote.showDoctors((doctors) => {
                                     console.log(doctors);
                                     rl.question('What is the name of the DOCTOR you\'d like to read? ', (doctorName) => {
-                                        remote.checkDoctorExistence(JSON.stringify(doctorName), (result) => {
-                                            if (result == 'exists') {
-                                                remote.readDoctor(JSON.stringify(doctorName), (result) => {
-                                                    console.log(result);
-                                                    startDialog();
-                                                });
+                                        remote.readDoctor(JSON.stringify(doctorName), (doctorInfo) => {
+                                            if (doctorInfo != 'error') {
+                                                console.log(doctorInfo);
                                             } else {
-                                                console.log(`${doctorName} does not exist. You should create him first.`);
-                                                startDialog();
-                                            };
+                                                console.log(`${doctorName} does not exist. Please, create it first.`);
+                                            }
+                                            startDialog();
                                         });
                                     });
                                 });
@@ -234,79 +225,171 @@ d.on('remote', (remote) => {
 
                 // UPDATE
                 case '3':
-                    rl.question('Who would you like to update? (club, player, doctor)\n', (entity) => {
+                    rl.question('What FIELD would you like to update - club(1), player(2) or doctor(3)?\n', (entity) => {
                         switch (entity) {
-                            case 'club': {
+                            case '1': {
                                 remote.showClubs((clubs) => {
                                     console.log(clubs);
-                                    rl.question('What is the name of the CLUB you\'d like to update? ', (clubName) => {
-                                        remote.checkClubExistence(JSON.stringify(clubName), (result) => {
-                                            if (result == 'exists') {
-                                                query.push(clubName);
-                                                rl.question(`New name: `, (newClubName) => {
-                                                    if ((newClubName != clubName) && (newClubName.match(/[a-zA-Z0-9]/i))) {                                                   
-                                                        query.push(newClubName);
-                                                        remote.updateClub(JSON.stringify(query));
-                                                        startDialog();
-                                                    } else {
-                                                        console.log('New name must contain letters and can not be the same as the old one. Please, try again.');
-                                                        startDialog();
-                                                    };
+                                    rl.question('Whose club would you like to update - player\'s(1) or doctor\'s(2)? ', (choice) => {
+                                        switch (choice) {
+                                            case '1': {
+                                                query.push('player');
+                                                remote.showPlayers(players => {
+                                                    console.log(players);
+                                                    rl.question('What is the name of the player whose club you\'d like to update? ', (playerName) => {
+                                                        query.push(playerName);
+                                                        remote.readPlayer(JSON.stringify(playerName), (playerInfo) => {
+                                                            if (playerInfo != 'error') {
+                                                                console.log(playerInfo);
+                                                                rl.question(`New club for ${playerName}: `, (newClubName) => {
+                                                                    query.push(newClubName);
+                                                                    remote.updateClub(JSON.stringify(query));
+                                                                    startDialog();
+                                                                });
+                                                            } else {
+                                                                console.log(`${playerName} does not exist. Please, create him first.`);
+                                                                startDialog();
+                                                            }
+                                                        });
+                                                    });
                                                 });
-                                            } else {
-                                                console.log(`${clubName} does not exist. You should create it first.`);
-                                                startDialog();
+                                                break;
                                             }
-                                        });
-                                    });
+                                            case '2': {
+                                                remote.showDoctors(doctors => {
+                                                    console.log(doctors);
+                                                    rl.question('What is the name of the doctor whose club you\'d like to update? ', (doctorName) => {
+                                                        query.push(doctorName);
+                                                        remote.readDoctor(JSON.stringify(doctorName), (doctorInfo) => {
+                                                            if (doctorInfo != 'error') {
+                                                                console.log(doctorInfo);
+                                                                rl.question(`New club for ${doctorName}: `, (newClubName) => {
+                                                                    query.push(newClubName);
+                                                                    remote.updateClub(JSON.stringify(query));
+                                                                    startDialog();
+                                                                });
+                                                            } else {
+                                                                console.log(`${doctorName} does not exist. Please, create him first.`);
+                                                                startDialog();
+                                                            }
+                                                        });
+                                                    });
+                                                });
+                                                break;
+                                            }
+                                            default:
+                                                startDialog();
+                                                break;
+                                        }
+                                    });     
                                 });
                                 break;
                             }
-                            case 'player': {
-                                remote.showPlayers((players) => {
-                                    console.log(players);
-                                    rl.question('What is the name of the PLAYER you\'d like to update? ', (playerName) => {
-                                        remote.checkPlayerExistence(JSON.stringify(playerName), (result) => {
-                                            if (result == 'exists') {
-                                                query.push(playerName);
-                                                rl.question(`New name: `, (newPlayerName) => {
-                                                    if ((newPlayerName != playerName) && (newPlayerName.match(/[a-zA-Z0-9]/i))) {                                                   
-                                                        query.push(newPlayerName);
-                                                        remote.updatePlayer(JSON.stringify(query));
-                                                        startDialog();
-                                                    } else {
-                                                        console.log('New name must contain letters and can not be the same as the old one. Please, try again.');
-                                                        startDialog();
-                                                    };
-                                                });
-                                            } else {
-                                                console.log(`${playerName} does not exist. You should create it first.`);
-                                                startDialog();
-                                            }
-                                        });
-                                    });
-                                });
-                                break;
-                            }
-                            case 'doctor': {
-                                remote.showDoctors((doctors) => {
+                            case '2': {
+                                remote.showDoctors(doctors => {
                                     console.log(doctors);
-                                    rl.question('What is the name of the DOCTOR you\'d like to update? ', (doctorName) => {
-                                        remote.checkDoctorExistence(JSON.stringify(doctorName), (result) => {
-                                            if (result == 'exists') {
+                                    rl.question('What is the name of the DOCTOR whose players list you\'d like to update? ', (doctorName) => {
+                                        remote.readDoctor(JSON.stringify(doctorName), doctorInfo => {
+                                            if (doctorInfo != 'error') {
                                                 query.push(doctorName);
-                                                rl.question(`New name: `, (newDoctorName) => {
-                                                    if ((newDoctorName != doctorName) && (newDoctorName.match(/[a-zA-Z0-9]/i))) {                                                   
-                                                        query.push(newDoctorName);
-                                                        remote.updateDoctor(JSON.stringify(query));
-                                                        startDialog();
-                                                    } else {
-                                                        console.log('New name must contain letters and can not be the same as the old one. Please, try again.');
-                                                        startDialog();
-                                                    };
+                                                console.log(doctorInfo);
+                                                rl.question(`Would you like to add(1) or delete(2) a player to/from ${doctorName}\'s players list? `, choice => {
+                                                    switch (choice) {
+                                                        case '1': {
+                                                            query.push('add');
+                                                            rl.question(`What is the name of the player you\'d like to add to ${doctorName}\'s players list? `, playerName => {
+                                                                remote.readPlayer(JSON.stringify(playerName), playerInfo => {
+                                                                    if (playerInfo != 'error') {
+                                                                        query.push(playerName);
+                                                                        remote.updatePlayer(JSON.stringify(query));
+                                                                        startDialog();
+                                                                    } else {
+                                                                        console.log(`${playerName} does not exist. Please, create him first.`);
+                                                                        startDialog();
+                                                                    }
+                                                                });
+                                                            });
+                                                            break;
+                                                        }
+                                                        case '2': {
+                                                            query.push('delete');
+                                                            rl.question(`What is the name of the player you\'d like to delete from ${doctorName}\'s players list? `, playerName => {
+                                                                remote.readPlayer(JSON.stringify(playerName), playerInfo => {
+                                                                    if (playerInfo != 'error') {
+                                                                        query.push(playerName);
+                                                                        remote.updatePlayer(JSON.stringify(query));
+                                                                        startDialog();
+                                                                    } else {
+                                                                        console.log(`${playerName} does not exist. Please, create him first.`);
+                                                                        startDialog();
+                                                                    }
+                                                                });
+                                                            });
+                                                            break;
+                                                        }
+                                                        default:
+                                                            startDialog();
+                                                            break;
+                                                    }
                                                 });
                                             } else {
-                                                console.log(`${clubName} does not exist. You should create it first.`);
+                                                console.log(`${doctorName} does not exist. Please, create him first.`);
+                                                startDialog();
+                                            }
+                                        });
+                                    });
+                                });
+                                break;
+                            }
+                            case '3': {
+                                remote.showPlayers(players => {
+                                    console.log(players);
+                                    rl.question('What is the name of the PLAYER whose doctors list you\'d like to update? ', (playerName) => {
+                                        remote.readPlayer(JSON.stringify(playerName), playerInfo => {
+                                            if (playerInfo != 'error') {
+                                                query.push(playerName);
+                                                console.log(playerInfo);
+                                                rl.question(`Would you like to add(1) or delete(2) a doctor to/from ${playerName}\'s doctors list? `, choice => {
+                                                    switch (choice) {
+                                                        case '1': {
+                                                            query.push('add');
+                                                            rl.question(`What is the name of the doctor you\'d like to add to ${playerName}\'s doctors list? `, doctorName => {
+                                                                remote.readDoctor(JSON.stringify(doctorName), doctorInfo => {
+                                                                    if (doctorInfo != 'error') {
+                                                                        query.push(doctorName);
+                                                                        remote.updateDoctor(JSON.stringify(query));
+                                                                        startDialog();
+                                                                    } else {
+                                                                        console.log(`${doctorName} does not exist. Please, create him first.`);
+                                                                        startDialog();
+                                                                    }
+                                                                });
+                                                            });
+                                                            break;
+                                                        }
+                                                        case '2': {
+                                                            query.push('delete');
+                                                            rl.question(`What is the name of the doctor you\'d like to delete from ${playerName}\'s doctors list? `, doctorName => {
+                                                                remote.readDoctor(JSON.stringify(doctorName), doctorInfo => {
+                                                                    if (doctorInfo != 'error') {
+                                                                        query.push(doctorName);
+                                                                        remote.updateDoctor(JSON.stringify(query));
+                                                                        startDialog();
+                                                                    } else {
+                                                                        console.log(`${doctorName} does not exist. Please, create him first.`);
+                                                                        startDialog();
+                                                                    }
+                                                                });
+                                                            });
+                                                            break;
+                                                        }
+                                                        default:
+                                                            startDialog();
+                                                            break;
+                                                    }
+                                                });
+                                            } else {
+                                                console.log(`${doctorName} does not exist. Please, create him first.`);
                                                 startDialog();
                                             }
                                         });
@@ -325,9 +408,9 @@ d.on('remote', (remote) => {
 
                 // DELETE
                 case '4':
-                    rl.question('Who would you like to delete? (club, player, doctor)\n', (entity) => {
+                    rl.question('Who would you like to delete - club(1), player(2) or doctor(3)?\n', (entity) => {
                         switch (entity) {
-                            case 'club': {
+                            case '1': {
                                 remote.showClubs((clubs) => {
                                     console.log(clubs);
                                     rl.question('What is the name of the CLUB you\'d like to delete? ', (clubName) => {
@@ -337,7 +420,7 @@ d.on('remote', (remote) => {
                                 });
                                 break;
                             }
-                            case 'player': {
+                            case '2': {
                                 remote.showPlayers((players) => {
                                     console.log(players);
                                     rl.question('What is the name of the PLAYER you\'d like to delete? ', (playerName) => {
@@ -347,7 +430,7 @@ d.on('remote', (remote) => {
                                 });
                                 break;
                             }
-                            case 'doctor': {
+                            case '3': {
                                 remote.showDoctors((doctors) => {
                                     console.log(doctors);
                                     rl.question('What is the name of the DOCTOR you\'d like to delete? ', (doctorName) => {
@@ -380,4 +463,3 @@ d.on('remote', (remote) => {
 
     startDialog();
 });
-
