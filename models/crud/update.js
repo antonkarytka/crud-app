@@ -2,73 +2,73 @@ const orm = require('../../orm/orm.js');
 const Club = orm.Club;
 const Player = orm.Player;
 const Doctor = orm.Doctor;
-
+//НЕ ДОБАВЛЯЕТСЯ ИГРОК К ДОКТОРУ
 module.exports = {
-    club : (query, cb) => {
+    club : async(query, cb) => {
         let queryItemts = JSON.parse(query);
         let instanceChoice = queryItemts[0];
         let instanceName = queryItemts[1];
         let newClubName = queryItemts[2];
         if (instanceChoice == 'player') {
-            Player.find({ where: { playerName: instanceName }}).then(player => {
-                Club.findOrCreate({ where: { clubName: newClubName }}).spread(club => {
-                    player.setClub(club);
-                });
-            });
+            let player = await Player.find({ where: { playerName: instanceName }});
+            let club = await Club.find({ where: { clubName: newClubName }});
+            if (club) {
+                await player.setClub(club);
+                cb(`${instanceName}\'s club field was updated successfully!`);
+            } else {
+                cb(`${newClubName} does not exist. Please, create it first.`);
+            };
         } else {
-            Doctor.find({ where: { doctorName: instanceName }}).then(doctor => {
-                Club.findOrCreate({ where: { clubName: newClubName }}).spread(club => {
-                    doctor.setClub(club);
-                });
-            });
+            let doctor = await Doctor.find({ where: { doctorName: instanceName }});
+            let club = await Club.find({ where: { clubName: newClubName }});
+            if (club) {
+                doctor.setClub(club);
+                cb(`${instanceName}\'s club field was updated successfully!`);
+            } else {
+                cb(`${newClubName} does not exist. Please, create it first.`);
+            };
         };
     },
 
-    player : (query, cb) => {
+    player : async(query, cb) => {
         let queryItemts = JSON.parse(query);
         let doctorName = queryItemts[0];
         let actionChoice = queryItemts[1];
         let playerName = queryItemts[2];
         if (actionChoice == 'add') {
-            Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
-                Player.find({ where: { playerName: playerName }}).then(player => {
-                    doctor.addPlayer(player);
-                });
-            });
+            let doctor = await Doctor.find({ where: { doctorName: doctorName }});
+            let player = await Player.find({ where: { playerName: playerName }});
+            await doctor.addPlayer(player);
+            cb(`${doctorName}\'s players list updated successfully!`);
         } else {
-            Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
-                Player.find({ where: { playerName: playerName }}).then(player => {
-                    doctor.getPlayers().then(players => {
-                        let deletionIndex = players.indexOf(playerName);
-                        players.splice(deletionIndex, 1);
-                        doctor.setPlayers(players);
-                    });
-                });
-            });
+            let doctor = await Doctor.find({ where: { doctorName: doctorName }});
+            let player = await Player.find({ where: { playerName: playerName }});
+            let players = await doctor.getPlayers();
+            let deletionIndex = players.indexOf(playerName);
+            players.splice(deletionIndex, 1);
+            await doctor.setPlayers(players);
+            cb(`${doctorName}\'s players list updated successfully!`);
         };
     },
 
-    doctor : (query, cb) => {
+    doctor : async(query, cb) => {
         let queryItemts = JSON.parse(query);
         let playerName = queryItemts[0];
         let actionChoice = queryItemts[1];
         let doctorName = queryItemts[2];
         if (actionChoice == 'add') {
-            Player.find({ where: { playerName: playerName }}).then(player => {
-                Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
-                    player.addDoctor(doctor);
-                });
-            });
+            let player = await Player.find({ where: { playerName: playerName }});
+            let doctor = await Doctor.find({ where: { doctorName: doctorName }});
+            await player.addDoctor(doctor);
+            cb(`${playerName}\'s doctors list updated successfully!`);
         } else {
-            Player.find({ where: { playerName: playerName }}).then(player => {
-                Doctor.find({ where: { doctorName: doctorName }}).then(doctor => {
-                    player.getDoctors().then(doctors => {
-                        let deletionIndex = doctors.indexOf(doctorName);
-                        doctors.splice(deletionIndex, 1);
-                        player.setDoctors(doctors);
-                    });
-                });
-            });
+            let player = await Player.find({ where: { playerName: playerName }});
+            let doctor = await Doctor.find({ where: { doctorName: doctorName }});
+            let doctors = await player.getDoctors();
+            let deletionIndex = doctors.indexOf(doctorName);
+            doctors.splice(deletionIndex, 1);
+            await player.setDoctors(doctors);
+            cb(`${playerName}\'s doctors list updated successfully!`);
         };
     }
 }

@@ -24,8 +24,5 @@ const server = dnode({
     showDoctors : show.doctors
 });
 
-server.listen(8080, () => { console.log('Server running on 8080...') });
-
-server.on('end', () => {
-    db.close();
-});
+server.listen(8080, () => console.log('Server running on 8080...'));
+server.on('end', () => db.close());

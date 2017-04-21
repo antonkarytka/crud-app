@@ -4,215 +4,201 @@ const Player = orm.Player;
 const Doctor = orm.Doctor;
 
 module.exports = {
-    club : (query, cb) => {
+    club : async(query, cb) => {
         let queryItems = JSON.parse(query);
-        let club = queryItems[0];
-        Club.findOrCreate({ where: { clubName: club } });
+        let clubName = queryItems[0];
+        let clubFound = await Club.find({ where: { clubName: clubName } });
+        if (clubFound) {
+            cb(`Club "${clubName}" already exists!`);
+        } else {
+            club = await Club.create({ clubName: clubName });
+            cb(`Club "${clubName}" has been created successfully!`);
+        };
     },
 
-    player : (query, cb) => {
+    player : async(query, cb) => {
         let queryItems = JSON.parse(query);
         let playerName = queryItems[0];
         let clubName = queryItems[queryItems.length - 1];
-        Club.find({ where: { clubName: clubName } }).then(clubFound => {
-            if (clubFound) {
-                Player.find({ where: { playerName: playerName } }).then(playerFound => {
-                    if (playerFound) {
-                        playerFound.setClub(clubFound);
-                        clubFound.addPlayers(playerFound);
-                        if (queryItems.length > 2) {
-                            for (let i = 1; i < queryItems.length - 1; i++) {
-                                Doctor.find({ where: { doctorName: queryItems[i] }}).then(doctorFound => {
-                                    if (doctorFound) {
-                                        doctorFound.setClub(clubFound);
-                                        clubFound.addDoctors(doctorFound);
-                                        playerFound.addDoctors(doctorFound);                                       
-                                    } else {
-                                        Doctor.create({ doctorName: queryItems[i] }).then(doctor => {
-                                            doctor.setClub(clubFound);
-                                            clubFound.addDoctors(doctorFound);
-                                            playerFound.addDoctors(doctorFound);
-                                        });                                        
-                                    };
-                                });
-                            };
-                        };    
-                    } else {
-                        Player.create({ playerName: playerName }).then(player => {
-                            player.setClub(clubFound);
-                            clubFound.addPlayers(player);
-                            if (queryItems.length > 2) {
-                                for (let i = 1; i < queryItems.length - 1; i++) {
-                                    Doctor.find({ where: { doctorName: queryItems[i] }}).then(doctorFound => {
-                                        if (doctorFound) {
-                                            doctorFound.setClub(clubFound);
-                                            clubFound.addDoctors(doctorFound);
-                                            player.addDoctors(doctorFound);                                       
-                                        } else {
-                                            Doctor.create({ doctorName: queryItems[i] }).then(doctor => {
-                                                doctor.setClub(clubFound);
-                                                clubFound.addDoctors(doctor);
-                                                player.addDoctors(doctor);
-                                            });                                        
-                                        };
-                                    });
-                                };
-                            };    
-                        });
-                    };
-                });
-            } else {
-                Club.create({ clubName: clubName }).then(club => {
-                    Player.find({ where: { playerName: playerName } }).then(playerFound => {
-                        if (playerFound) {
-                            playerFound.setClub(club);
-                            club.addPlayers(playerFound);
-                            if (queryItems.length > 2) {
-                                for (let i = 1; i < queryItems.length - 1; i++) {
-                                    Doctor.find({ where: { doctorName: queryItems[i] }}).then(doctorFound => {
-                                        if (doctorFound) {
-                                            doctorFound.setClub(club);
-                                            club.addDoctors(doctorFound);
-                                            playerFound.addDoctors(doctorFound);                                       
-                                        } else {
-                                            Doctor.create({ doctorName: queryItems[i] }).then(doctor => {
-                                                doctor.setClub(club);
-                                                club.addDoctors(doctorFound);
-                                                playerFound.addDoctors(doctorFound);
-                                            });                                        
-                                        };
-                                    });
-                                };
-                            };    
+        let clubFound = await Club.find({ where: { clubName: clubName } });
+        if (clubFound) {
+            let playerFound = await Player.find({ where: { playerName: playerName } });
+            if (playerFound) {
+                await playerFound.setClub(clubFound);
+                await clubFound.addPlayer(playerFound);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let doctorFound = await Doctor.find({ where: { doctorName: queryItems[i] }});
+                        if (doctorFound) {
+                            await doctorFound.setClub(clubFound);
+                            await clubFound.addDoctor(doctorFound);
+                            await playerFound.addDoctor(doctorFound);
                         } else {
-                            Player.create({ playerName: playerName }).then(player => {
-                                player.setClub(club);
-                                club.addPlayers(player);
-                                if (queryItems.length > 2) {
-                                    for (let i = 1; i < queryItems.length - 1; i++) {
-                                        Doctor.find({ where: { doctorName: queryItems[i] }}).then(doctorFound => {
-                                            if (doctorFound) {
-                                                doctorFound.setClub(club);
-                                                club.addDoctors(doctorFound);
-                                                player.addDoctors(doctorFound);                                       
-                                            } else {
-                                                Doctor.create({ doctorName: queryItems[i] }).then(doctor => {
-                                                    doctor.setClub(club);
-                                                    club.addDoctors(doctor);
-                                                    player.addDoctors(doctor);
-                                                });                                        
-                                            };
-                                        });
-                                    };
-                                };    
-                            });
+                            let doctor = await Doctor.create({ doctorName: queryItems[i] });
+                            await doctor.setClub(clubFound);
+                            await clubFound.addDoctor(doctorFound);
+                            await playerFound.addDoctor(doctorFound);
                         };
-                    });
-                });
-            }
-        });
+                    };
+                };
+                cb(`Player ${playerName} already exists, but necessary references have been added!`);
+            } else {
+                let player = await Player.create({ playerName: playerName });
+                await player.setClub(clubFound);
+                await clubFound.addPlayer(player);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let doctorFound = await Doctor.find({ where: { doctorName: queryItems[i] }});
+                        if (doctorFound) {
+                            await doctorFound.setClub(clubFound);
+                            await clubFound.addDoctor(doctorFound);
+                            await player.addDoctor(doctorFound);
+                        } else {
+                            let doctor = await Doctor.create({ doctorName: queryItems[i] });
+                            await doctor.setClub(clubFound);
+                            await clubFound.addDoctor(doctor);
+                            await player.addDoctor(doctor);
+                        };
+                    };
+                };
+                cb(`Player ${playerName} has been created successfully!`)
+            };
+        } else {
+            let club = await Club.create({ clubName: clubName });
+            let playerFound = await Player.find({ where: { playerName: playerName } });
+            if (playerFound) {
+                await playerFound.setClub(club);
+                await club.addPlayer(playerFound);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let doctorFound = await Doctor.find({ where: { doctorName: queryItems[i] }});
+                        if (doctorFound) {
+                            await doctorFound.setClub(club);
+                            await club.addDoctor(doctorFound);
+                            await playerFound.addDoctor(doctorFound);
+                        } else {
+                            let doctor = await Doctor.create({ doctorName: queryItems[i] });
+                            await doctor.setClub(club);
+                            await club.addDoctor(doctorFound);
+                            await playerFound.addDoctor(doctorFound);
+                        };
+                    };
+                };
+                cb(`Club "${clubName}" has been created successfully! Player ${playerName} already exists, but all necessary references have been added!`)
+            } else {
+                let player = await Player.create({ playerName: playerName });
+                await player.setClub(club);
+                await club.addPlayer(player);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let doctorFound = await Doctor.find({ where: { doctorName: queryItems[i] }});
+                        if (doctorFound) {
+                            await doctorFound.setClub(club);
+                            await club.addDoctor(doctorFound);
+                            await player.addDoctor(doctorFound);
+                        } else {
+                            let doctor = await Doctor.create({ doctorName: queryItems[i] });
+                            await doctor.setClub(club);
+                            await club.addDoctor(doctor);
+                            await player.addDoctor(doctor);
+                        };
+                    };
+                };
+                cb(`Club "${clubName}" and player ${playerName} have been created successfully!`)
+            };
+        };
     },
 
-    doctor : (query, cb) => {
+    doctor : async(query, cb) => {
         let queryItems = JSON.parse(query);
         let doctorName = queryItems[0];
         let clubName = queryItems[queryItems.length - 1];
-        Club.find({ where: { clubName: clubName } }).then(clubFound => {
-            if (clubFound) {
-                Doctor.find({ where: { doctorName: doctorName } }).then(doctorFound => {
-                    if (doctorFound) {
-                        doctorFound.setClub(clubFound);
-                        clubFound.addDoctors(doctorFound);
-                        if (queryItems.length > 2) {
-                            for (let i = 1; i < queryItems.length - 1; i++) {
-                                Player.find({ where: { playerName: queryItems[i] }}).then(playerFound => {
-                                    if (playerFound) {
-                                        playerFound.setClub(clubFound);
-                                        clubFound.addPlayers(playerFound);
-                                        doctorFound.addPlayers(playerFound);                                       
-                                    } else {
-                                        Player.create({ playerName: queryItems[i] }).then(player => {
-                                            player.setClub(clubFound);
-                                            clubFound.addPlayers(player);
-                                            doctorFound.addPlayers(player);
-                                        });                                        
-                                    };
-                                });
-                            };
-                        };    
-                    } else {
-                        Doctor.create({ doctorName: doctorName }).then(doctor => {
-                            doctor.setClub(clubFound);
-                            clubFound.addDoctors(doctor);
-                            if (queryItems.length > 2) {
-                                for (let i = 1; i < queryItems.length - 1; i++) {
-                                    Player.find({ where: { playerName: queryItems[i] }}).then(playerFound => {
-                                        if (playerFound) {
-                                            playerFound.setClub(clubFound);
-                                            clubFound.addPlayers(playerFound);
-                                            doctor.addPlayers(playerFound);                                       
-                                        } else {
-                                            Player.create({ playerName: queryItems[i] }).then(player => {
-                                                player.setClub(clubFound);
-                                                clubFound.addPlayers(player);
-                                                doctor.addPlayers(player);
-                                            });                                        
-                                        };
-                                    });
-                                };
-                            };    
-                        });
-                    };
-                });
-            } else {
-                Club.create({ clubName: clubName }).then(club => {
-                    Doctor.find({ where: { doctorName: doctorName } }).then(doctorFound => {
-                        if (doctorFound) {
-                            doctorFound.setClub(club);
-                            club.addDoctors(doctorFound);
-                            if (queryItems.length > 2) {
-                                for (let i = 1; i < queryItems.length - 1; i++) {
-                                    Player.find({ where: { playerName: queryItems[i] }}).then(playerFound => {
-                                        if (playerFound) {
-                                            playerFound.setClub(club);
-                                            club.addPlayers(playerFound);
-                                            doctorFound.addPlayers(playerFound);                                       
-                                        } else {
-                                            Player.create({ playerName: queryItems[i] }).then(player => {
-                                                player.setClub(club);
-                                                club.addPlayers(player);
-                                                doctorFound.addPlayers(player);
-                                            });                                        
-                                        };
-                                    });
-                                };
-                            };    
+        let clubFound = await Club.find({ where: { clubName: clubName } });
+        if (clubFound) {
+            let doctorFound = await Doctor.find({ where: { doctorName: doctorName } });
+            if (doctorFound) {
+                await doctorFound.setClub(clubFound);
+                await clubFound.addDoctor(doctorFound);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let playerFound = await Player.find({ where: { playerName: queryItems[i] }});
+                        if (playerFound) {
+                            await playerFound.setClub(clubFound);
+                            await clubFound.addPlayer(playerFound);
+                            await doctorFound.addPlayer(playerFound);
                         } else {
-                            Doctor.create({ doctorName: doctorName }).then(doctor => {
-                                doctor.setClub(club);
-                                club.addDoctors(doctor);
-                                if (queryItems.length > 2) {
-                                    for (let i = 1; i < queryItems.length - 1; i++) {
-                                        Player.find({ where: { playerName: queryItems[i] }}).then(playerFound => {
-                                            if (playerFound) {
-                                                playerFound.setClub(club);
-                                                club.addPlayers(playerFound);
-                                                doctor.addPlayers(playerFound);                                       
-                                            } else {
-                                                Player.create({ playerName: queryItems[i] }).then(player => {
-                                                    player.setClub(club);
-                                                    club.addPlayer(player);
-                                                    doctor.addPlayers(player);
-                                                });                                        
-                                            };
-                                        });
-                                    };
-                                };    
-                            });
+                            let player = await Player.create({ playerName: queryItems[i] });
+                            await player.setClub(clubFound);
+                            await clubFound.addPlayer(player);
+                            await doctorFound.addPlayer(player);
                         };
-                    });
-                });
-            }
-        });
+                    };
+                };
+                cb(`Doctor ${doctorName} already exists, but necessary references have been added!`);
+            } else {
+                let doctor = await Doctor.create({ doctorName: doctorName });
+                await doctor.setClub(clubFound);
+                await clubFound.addDoctor(doctor);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let playerFound = await Player.find({ where: { playerName: queryItems[i] }});
+                        if (playerFound) {
+                            await playerFound.setClub(clubFound);
+                            await clubFound.addPlayer(playerFound);
+                            await doctor.addPlayer(playerFound);
+                        } else {
+                            let player = await Player.create({ playerName: queryItems[i] });
+                            await player.setClub(clubFound);
+                            await clubFound.addPlayer(player);
+                            await doctor.addPlayer(player);
+                        };
+                    };
+                };
+                cb(`Doctor ${doctorName} has been created successfully!`)
+            };
+        } else {
+            let club = await Club.create({ clubName: clubName });
+            let doctorFound = await Doctor.find({ where: { doctorName: doctorName } });
+            if (doctorFound) {
+                await doctorFound.setClub(club);
+                await club.addDoctor(doctorFound);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let playerFound = await Player.find({ where: { playerName: queryItems[i] }});
+                        if (playerFound) {
+                            await playerFound.setClub(club);
+                            await club.addPlayer(playerFound);
+                            await doctorFound.addPlayer(playerFound);
+                        } else {
+                            let player = await Player.create({ playerName: queryItems[i] });
+                            await player.setClub(club);
+                            await club.addPlayer(player);
+                            await doctorFound.addPlayer(player);
+                        };
+                    };
+                };
+                cb(`Club "${clubName}" has been created successfully! Doctor ${doctorName} already exists, but all necessary references have been added!`)
+            } else {
+                let doctor = await Doctor.create({ doctorName: doctorName });
+                await doctor.setClub(club);
+                await club.addDoctors(doctor);
+                if (queryItems.length > 2) {
+                    for (let i = 1; i < queryItems.length - 1; i++) {
+                        let playerFound = await Player.find({ where: { playerName: queryItems[i] }});
+                        if (playerFound) {
+                            await playerFound.setClub(club);
+                            await club.addPlayer(playerFound);
+                            await doctor.addPlayer(playerFound);
+                        } else {
+                            let player = await Player.create({ playerName: queryItems[i] });
+                            await player.setClub(club);
+                            await club.addPlayer(player);
+                            await doctor.addPlayer(player);
+                        };
+                    };
+                };
+                cb(`Club "${clubName}" and doctor ${doctorName} have been created successfully!`)
+            };
+        };
     }
 }

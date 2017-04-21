@@ -23,8 +23,10 @@ d.on('remote', (remote) => {
                                     rl.question('What is the name of the CLUB you\'d like to create? ', (clubName) => {
                                         if (clubName.match(/[a-zA-Z0-9]/i)) {
                                             query.push(clubName);
-                                            remote.createClub(JSON.stringify(query));
-                                            startDialog();
+                                            remote.createClub(JSON.stringify(query), result => {
+                                                console.log(result);
+                                                startDialog();
+                                            });
                                         } else {
                                             console.log('Club\'s name must contain letters. Please, try again.');
                                             startDialog();
@@ -81,8 +83,10 @@ d.on('remote', (remote) => {
                                             rl.question(`What is the name of the CLUB ${playerName} plays for? `, (clubName) => {
                                                 if (clubName.match(/[a-zA-Z0-9]/i)) {
                                                     query.push(clubName);
-                                                    remote.createPlayer(JSON.stringify(query));
-                                                    startDialog();
+                                                    remote.createPlayer(JSON.stringify(query), result => {
+                                                        console.log(result);
+                                                        startDialog();
+                                                    });
                                                 } else {
                                                     console.log('Club\'s name must contain letters. Please, try again.');
                                                     enterClub();
@@ -141,8 +145,10 @@ d.on('remote', (remote) => {
                                             rl.question(`What is the name of the CLUB ${doctorName} works for? `, (clubName) => {
                                                 if (clubName.match(/[a-zA-Z0-9]/i)) {
                                                     query.push(clubName);
-                                                    remote.createDoctor(JSON.stringify(query));
-                                                    startDialog();
+                                                    remote.createDoctor(JSON.stringify(query), result => {
+                                                        console.log(result);
+                                                        startDialog();
+                                                    });
                                                 } else {
                                                     console.log('Club\'s name must contain letters. Please, try again.');
                                                     enterClub();
@@ -243,8 +249,10 @@ d.on('remote', (remote) => {
                                                                 console.log(playerInfo);
                                                                 rl.question(`New club for ${playerName}: `, (newClubName) => {
                                                                     query.push(newClubName);
-                                                                    remote.updateClub(JSON.stringify(query));
-                                                                    startDialog();
+                                                                    remote.updateClub(JSON.stringify(query), result => {
+                                                                        console.log(result);
+                                                                        startDialog();
+                                                                    });
                                                                 });
                                                             } else {
                                                                 console.log(`${playerName} does not exist. Please, create him first.`);
@@ -256,6 +264,7 @@ d.on('remote', (remote) => {
                                                 break;
                                             }
                                             case '2': {
+                                                query.push('doctor');
                                                 remote.showDoctors(doctors => {
                                                     console.log(doctors);
                                                     rl.question('What is the name of the doctor whose club you\'d like to update? ', (doctorName) => {
@@ -265,8 +274,10 @@ d.on('remote', (remote) => {
                                                                 console.log(doctorInfo);
                                                                 rl.question(`New club for ${doctorName}: `, (newClubName) => {
                                                                     query.push(newClubName);
-                                                                    remote.updateClub(JSON.stringify(query));
-                                                                    startDialog();
+                                                                    remote.updateClub(JSON.stringify(query), result => {
+                                                                        console.log(result);
+                                                                        startDialog();
+                                                                    });
                                                                 });
                                                             } else {
                                                                 console.log(`${doctorName} does not exist. Please, create him first.`);
@@ -281,7 +292,7 @@ d.on('remote', (remote) => {
                                                 startDialog();
                                                 break;
                                         }
-                                    });     
+                                    });
                                 });
                                 break;
                             }
@@ -301,8 +312,10 @@ d.on('remote', (remote) => {
                                                                 remote.readPlayer(JSON.stringify(playerName), playerInfo => {
                                                                     if (playerInfo != 'error') {
                                                                         query.push(playerName);
-                                                                        remote.updatePlayer(JSON.stringify(query));
-                                                                        startDialog();
+                                                                        remote.updatePlayer(JSON.stringify(query), result => {
+                                                                            console.log(result);
+                                                                            startDialog();
+                                                                        });
                                                                     } else {
                                                                         console.log(`${playerName} does not exist. Please, create him first.`);
                                                                         startDialog();
@@ -317,8 +330,10 @@ d.on('remote', (remote) => {
                                                                 remote.readPlayer(JSON.stringify(playerName), playerInfo => {
                                                                     if (playerInfo != 'error') {
                                                                         query.push(playerName);
-                                                                        remote.updatePlayer(JSON.stringify(query));
-                                                                        startDialog();
+                                                                        remote.updatePlayer(JSON.stringify(query), result => {
+                                                                            console.log(result);
+                                                                            startDialog();
+                                                                        });
                                                                     } else {
                                                                         console.log(`${playerName} does not exist. Please, create him first.`);
                                                                         startDialog();
@@ -357,8 +372,10 @@ d.on('remote', (remote) => {
                                                                 remote.readDoctor(JSON.stringify(doctorName), doctorInfo => {
                                                                     if (doctorInfo != 'error') {
                                                                         query.push(doctorName);
-                                                                        remote.updateDoctor(JSON.stringify(query));
-                                                                        startDialog();
+                                                                        remote.updateDoctor(JSON.stringify(query), result => {
+                                                                            console.log(result);
+                                                                            startDialog();
+                                                                        });
                                                                     } else {
                                                                         console.log(`${doctorName} does not exist. Please, create him first.`);
                                                                         startDialog();
@@ -373,8 +390,10 @@ d.on('remote', (remote) => {
                                                                 remote.readDoctor(JSON.stringify(doctorName), doctorInfo => {
                                                                     if (doctorInfo != 'error') {
                                                                         query.push(doctorName);
-                                                                        remote.updateDoctor(JSON.stringify(query));
-                                                                        startDialog();
+                                                                        remote.updateDoctor(JSON.stringify(query), result => {
+                                                                            console.log(result);
+                                                                            startDialog();
+                                                                        });
                                                                     } else {
                                                                         console.log(`${doctorName} does not exist. Please, create him first.`);
                                                                         startDialog();
@@ -414,8 +433,10 @@ d.on('remote', (remote) => {
                                 remote.showClubs((clubs) => {
                                     console.log(clubs);
                                     rl.question('What is the name of the CLUB you\'d like to delete? ', (clubName) => {
-                                        remote.deleteClub(JSON.stringify(clubName));
-                                        startDialog();
+                                        remote.deleteClub(JSON.stringify(clubName), result => {
+                                            console.log(result);
+                                            startDialog();
+                                        });
                                     });
                                 });
                                 break;
@@ -424,8 +445,10 @@ d.on('remote', (remote) => {
                                 remote.showPlayers((players) => {
                                     console.log(players);
                                     rl.question('What is the name of the PLAYER you\'d like to delete? ', (playerName) => {
-                                        remote.deletePlayer(JSON.stringify(playerName));
-                                        startDialog();
+                                        remote.deletePlayer(JSON.stringify(playerName), result => {
+                                            console.log(result);
+                                            startDialog();
+                                        });
                                     });
                                 });
                                 break;
@@ -434,8 +457,10 @@ d.on('remote', (remote) => {
                                 remote.showDoctors((doctors) => {
                                     console.log(doctors);
                                     rl.question('What is the name of the DOCTOR you\'d like to delete? ', (doctorName) => {
-                                        remote.deleteDoctor(JSON.stringify(doctorName));
-                                        startDialog();
+                                        remote.deleteDoctor(JSON.stringify(doctorName), result => {
+                                            console.log(result);
+                                            startDialog();
+                                        });
                                     });
                                 });
                                 break;
