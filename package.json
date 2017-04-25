@@ -18,9 +18,7 @@
   },
   "homepage": "https://github.com/antnkrtk/crud-app#readme",
   "dependencies": {
-    "dnode": "^1.2.2",
     "net": "^1.0.2",
-    "sequelize": "^3.30.4",
-    "socket-io": "^1.0.0"
+    "sequelize": "^3.30.4"
   }
 }
