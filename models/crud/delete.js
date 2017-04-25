@@ -4,30 +4,30 @@ const Player = orm.Player;
 const Doctor = orm.Doctor;
 
 module.exports = {
-    club : async(query, cb) => {
+    club : async(query) => {
         let club = JSON.parse(query);
         let clubDeleted = await Club.destroy({ where: { clubName: club } });
         if (clubDeleted)
-            cb(`${club} was deleted successfully!`)
+            return `${club} was deleted successfully!`;
         else
-            cb(`${club} does not exist. Please, create it first.`)
+            return `${club} does not exist. Please, create it first.`;
     },
 
-    player : async(query, cb) => {
+    player : async(query) => {
         let player = JSON.parse(query);
         let playerDeleted = await Player.destroy({ where: { playerName: player } });
         if (playerDeleted)
-            cb(`${player} was deleted successfully!`)
+            return `${player} was deleted successfully!`;
         else
-            cb(`${player} does not exist. Please, create him first.`)
+            return `${player} does not exist. Please, create him first.`;
     },
 
-    doctor : async(query, cb) => {
+    doctor : async(query) => {
         let doctor = JSON.parse(query);
         let doctorDeleted = await Doctor.destroy({ where: { doctorName: doctor } });
         if (doctorDeleted)
-            cb(`${doctor} was deleted successfully!`)
+            return `${doctor} was deleted successfully!`;
         else
-            cb(`${doctor} does not exist. Please, create him first.`)
+            return `${doctor} does not exist. Please, create him first.`;
     }
 }

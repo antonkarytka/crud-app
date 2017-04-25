@@ -4,19 +4,19 @@ const Player = orm.Player;
 const Doctor = orm.Doctor;
 
 module.exports = {
-    club : async(query, cb) => {
+    club : async(query) => {
         let queryItems = JSON.parse(query);
         let clubName = queryItems[0];
         let clubFound = await Club.find({ where: { clubName: clubName } });
         if (clubFound) {
-            cb(`Club "${clubName}" already exists!`);
+            return `Club "${clubName}" already exists!`;
         } else {
             club = await Club.create({ clubName: clubName });
-            cb(`Club "${clubName}" has been created successfully!`);
+            return `Club "${clubName}" has been created successfully!`;
         };
     },
 
-    player : async(query, cb) => {
+    player : async(query) => {
         let queryItems = JSON.parse(query);
         let playerName = queryItems[0];
         let clubName = queryItems[queryItems.length - 1];
@@ -41,7 +41,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Player ${playerName} already exists, but necessary references have been added!`);
+                return `Player ${playerName} already exists, but necessary references have been added!`;
             } else {
                 let player = await Player.create({ playerName: playerName });
                 await player.setClub(clubFound);
@@ -61,7 +61,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Player ${playerName} has been created successfully!`)
+                return `Player ${playerName} has been created successfully!`;
             };
         } else {
             let club = await Club.create({ clubName: clubName });
@@ -84,7 +84,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Club "${clubName}" has been created successfully! Player ${playerName} already exists, but all necessary references have been added!`)
+                return `Club "${clubName}" has been created successfully! Player ${playerName} already exists, but all necessary references have been added!`;
             } else {
                 let player = await Player.create({ playerName: playerName });
                 await player.setClub(club);
@@ -104,12 +104,12 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Club "${clubName}" and player ${playerName} have been created successfully!`)
+                return `Club "${clubName}" and player ${playerName} have been created successfully!`;
             };
         };
     },
 
-    doctor : async(query, cb) => {
+    doctor : async(query) => {
         let queryItems = JSON.parse(query);
         let doctorName = queryItems[0];
         let clubName = queryItems[queryItems.length - 1];
@@ -134,7 +134,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Doctor ${doctorName} already exists, but necessary references have been added!`);
+                return `Doctor ${doctorName} already exists, but necessary references have been added!`;
             } else {
                 let doctor = await Doctor.create({ doctorName: doctorName });
                 await doctor.setClub(clubFound);
@@ -154,7 +154,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Doctor ${doctorName} has been created successfully!`)
+                return `Doctor ${doctorName} has been created successfully!`;
             };
         } else {
             let club = await Club.create({ clubName: clubName });
@@ -177,7 +177,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Club "${clubName}" has been created successfully! Doctor ${doctorName} already exists, but all necessary references have been added!`)
+                return `Club "${clubName}" has been created successfully! Doctor ${doctorName} already exists, but all necessary references have been added!`;
             } else {
                 let doctor = await Doctor.create({ doctorName: doctorName });
                 await doctor.setClub(club);
@@ -197,7 +197,7 @@ module.exports = {
                         };
                     };
                 };
-                cb(`Club "${clubName}" and doctor ${doctorName} have been created successfully!`)
+                return `Club "${clubName}" and doctor ${doctorName} have been created successfully!`;
             };
         };
     }

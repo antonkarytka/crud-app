@@ -4,7 +4,7 @@ const Player = orm.Player;
 const Doctor = orm.Doctor;
 
 module.exports = {
-    club : async(query, cb) => {
+    club : async(query) => {
         let clubName = JSON.parse(query);
         let club = await Club.find({ where: { clubName: clubName } });
         if (club) {
@@ -31,13 +31,13 @@ module.exports = {
             } else {
                 clubInfo += 'none';
             };
-            cb(clubInfo);
+            return clubInfo;
         } else {
-            cb('error');
+            return 'error';
         };
     },
 
-    player : async(query, cb) => {
+    player : async(query) => {
         let playerName = JSON.parse(query);
         let player = await Player.find({ where: { playerName: playerName } });
         if (player) {
@@ -52,13 +52,13 @@ module.exports = {
             } else {
                 playerInfo += 'none';
             };
-            cb(playerInfo);
+            return playerInfo;
         } else {
-            cb('error');
+            return 'error';
         };
     },
 
-    doctor : async(query, cb) => {
+    doctor : async(query) => {
         let doctorName = JSON.parse(query);
         let doctor = await Doctor.find({ where: { doctorName: doctorName } });
         if (doctor) {
@@ -73,9 +73,9 @@ module.exports = {
             } else {
                 doctorInfo += 'none';
             };
-            cb(doctorInfo);
+            return doctorInfo;
         } else {
-            cb('error');
+            return 'error';
         };
     }
 }

@@ -4,7 +4,7 @@ const Player = orm.Player;
 const Doctor = orm.Doctor;
 
 module.exports = {
-    clubs : async(cb) => {
+    clubs : async() => {
         let clubsList = 'Existing clubs: ';
         let clubs = await Club.findAll();
         if (clubs.length > 0) {
@@ -14,10 +14,10 @@ module.exports = {
         } else {
             clubsList += 'none';
         };
-        cb(clubsList);
+        return clubsList;
     },
 
-    players : async(cb) => {
+    players : async() => {
         let playersList = 'Existing players: ';
         let players = await Player.findAll();
         if (players.length > 0) {
@@ -27,10 +27,10 @@ module.exports = {
         } else {
             playersList += 'none';
         };
-        cb(playersList);
+        return playersList;
     },
 
-    doctors : async(cb) => {
+    doctors : async() => {
         let doctorsList = 'Existing doctors: ';
         let doctors = await Doctor.findAll();
         if (doctors.length > 0) {
@@ -40,6 +40,6 @@ module.exports = {
         } else {
             doctorsList += 'none';
         };
-        cb(doctorsList);
+        return doctorsList;
     }
 }
